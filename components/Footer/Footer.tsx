@@ -1,103 +1,97 @@
-import React from "react";
 import Link from "next/link";
 import {
-    FaFacebookF,
-    FaTwitter,
-    FaInstagram,
-    FaLinkedinIn,
-    FaGithub,
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedinIn,
+  FaGithub,
 } from "react-icons/fa";
 
 const Footer = () => {
-    return (
-        <footer className="bg-gray-900 text-gray-300">
-            <div className="max-w-7xl mx-auto px-6 b_container py-12 md:flex md:justify-between md:space-x-8">
-                {/* Section 1 - Logo & Description */}
-                <div className="mb-10 md:mb-0 md:w-1/3">
-                    <h2 className="text-2xl font-bold mb-4">YourLogo</h2>
-                    <p className="text-sm leading-relaxed max-w-xs">
-                        We provide the best services with excellent customer support and
-                        innovative solutions tailored just for you.
-                    </p>
-                </div>
+  return (
+    <footer className="bg-[#0d0d0d] text-gray-300">
+      {/* Top section with 4 columns */}
+      <div className="max-w-7xl mx-auto  px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        {/* Column 1: Logo & Description */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Baderwals</h2>
+          <p className="text-m leading-relaxed">
+            We provide excellent digital solutions to elevate your business online and offline.
+          </p>
+        </div>
 
-                {/* Section 2 - Links */}
-                <div className="mb-10 md:mb-0 md:w-1/3">
-                    <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
-                    <ul className="text-xs space-y-2 max-w-xs">
-                        <li>
-                            <Link href="/" className="hover:text-white transition">Home</Link>
+        {/* Column 2: Quick Links */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
+          <ul className="text-m space-y-2">
+            <li><Link href="/" className="hover:text-white">Home</Link></li>
+            <li><Link href="/about" className="hover:text-white">About Us</Link></li>
+            <li><Link href="/projects" className="hover:text-white">Projects</Link></li>
+            <li><Link href="/blog" className="hover:text-white">Blog</Link></li>
+            <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
+            <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
+            <li><Link href="/careers" className="hover:text-white">Careers</Link></li>
+          </ul>
+        </div>
 
-                        </li>
-                        <li>
-                            <Link href="/about" className="hover:text-white transition">About Us</Link>
+        {/* Column 3: Contact Info */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
+          <p className="text-m mb-2">1234 Example St, City, Country</p>
+          <p className="text-m mb-2">Phone: +1 (234) 567-890</p>
+          <p className="text-m">Email: info@example.com</p>
+        </div>
 
-                        </li>
-                        <li>
+        {/* Column 4: Newsletter */}
+        <div>
+          <h3 className="text-xl font-semibold mb-4">Subscribe to Our Newsletter</h3>
+          <p className="text-m mb-4">
+            Get the latest news and updates directly to your inbox.
+          </p>
+          <form className="flex flex-col gap-2">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="px-4 py-2 rounded text-white w-full flex-1 outline-none"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-white hover:bg-gray-200 px-4 py-2 rounded text-black w-full cursor-pointer"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
 
-                            <Link href="/services" className="hover:text-white transition">Services</Link>
-
-                        </li>
-                        <li>
-                            <Link href="/blog" className="hover:text-white transition">Blog</Link>
-
-                        </li>
-                        <li>
-                            <Link href="/contact" className="hover:text-white transition">Contact</Link>
-
-                        </li>
-                        <li>
-
-                            <Link href="/faq" className="hover:text-white transition">FAQ</Link>
-
-                        </li>
-                        <li>
-
-                            <Link href="/careers" className="hover:text-white transition">Careers</Link>
-
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Section 3 - Contact Info */}
-                <div className="md:w-1/3">
-                    <h3 className="text-xl font-semibold mb-4">Contact Us</h3>
-                    <p className="text-sm mb-2">
-                        Address: 1234 Street Name, City, State, Country
-                    </p>
-                    <p className="text-sm mb-2">Phone: +1 (234) 567-8901</p>
-                    <p className="text-sm mb-2">Email: info@example.com</p>
-                </div>
-            </div>
-
-            {/* Bottom copyright and social links */}
-            <div className="border-t border-gray-700 mt-8 py-6">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
-                    <p className="text-xs text-gray-500 mb-4 md:mb-0">
-                        &copy; {new Date().getFullYear()} YourCompany. All rights reserved.
-                    </p>
-
-                    <div className="flex space-x-6 text-gray-400 text-lg">
-                        <Link href="#" className="hover:text-white transition" aria-label="Facebook">
-                            <FaFacebookF />
-                        </Link>
-                        <Link href="#" className="hover:text-white transition" aria-label="Twitter">
-                            <FaTwitter />
-                        </Link>
-                        <Link href="#" className="hover:text-white transition" aria-label="Instagram">
-                            <FaInstagram />
-                        </Link>
-                        <Link href="#" className="hover:text-white transition" aria-label="LinkedIn">
-                            <FaLinkedinIn />
-                        </Link>
-                        <Link href="#" className="hover:text-white transition" aria-label="GitHub">
-                            <FaGithub />
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    );
+      {/* Bottom: Copyright & Socials */}
+      <div className="border-t border-gray-700 mt-8 py-6">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-500">
+            &copy; {new Date().getFullYear()} Baderwals. All rights reserved.
+          </p>
+          <div className="flex gap-4 text-gray-400 text-lg">
+            <a href="#" className="hover:text-white transition" aria-label="Facebook">
+              <FaFacebookF />
+            </a>
+            <a href="#" className="hover:text-white transition" aria-label="Twitter">
+              <FaTwitter />
+            </a>
+            <a href="#" className="hover:text-white transition" aria-label="Instagram">
+              <FaInstagram />
+            </a>
+            <a href="#" className="hover:text-white transition" aria-label="LinkedIn">
+              <FaLinkedinIn />
+            </a>
+            <a href="#" className="hover:text-white transition" aria-label="GitHub">
+              <FaGithub />
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

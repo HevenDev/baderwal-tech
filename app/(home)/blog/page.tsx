@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Banner from "@/components/Banner/Banner";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type CardData = {
     img: string;
@@ -28,40 +29,44 @@ const truncateWords = (text: string, count: number): string => {
 };
 
 const BlogPage = () => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
+    const pageFromURL = parseInt(searchParams.get("page") || "1", 10);
+    const [currentPage, setCurrentPage] = useState(pageFromURL);
 
-    const [currentPage, setCurrentPage] = useState(1);
     const [isLargeScreen, setIsLargeScreen] = useState(false);
     const cardsPerPage = isLargeScreen ? 9 : 8;
 
+    const sectionRef = useRef<HTMLDivElement>(null);
+
+    // On URL change, update the state (for back/forward navigation)
     useEffect(() => {
-        // Initial check
+        const page = parseInt(searchParams.get("page") || "1", 10);
+        setCurrentPage(page);
+    }, [searchParams]);
+
+    // Screen size logic
+    useEffect(() => {
         const checkScreenSize = () => {
             const width = window.innerWidth;
             setIsLargeScreen(width >= 768 && width < 1024); // lg breakpoint ~1024px
         };
 
         checkScreenSize();
-
         window.addEventListener("resize", checkScreenSize);
-
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
 
-    // calculate total pages based on cardsPerPage
+
     const totalPages = Math.ceil(blogData.length / cardsPerPage);
     const startIndex = (currentPage - 1) * cardsPerPage;
     const endIndex = startIndex + cardsPerPage;
     const currentCards = blogData.slice(startIndex, endIndex);
-    const sectionRef = useRef<HTMLDivElement>(null);
 
-    const scrollToTop = () => {
-        sectionRef.current?.scrollIntoView({ behavior: "smooth" });
+    const handlePageChange = (newPage: number) => {
+        router.push(`?page=${newPage}`);
     };
-
-    useEffect(() => {
-        scrollToTop();
-    }, [currentPage]);
 
     return (
         <>
@@ -83,38 +88,38 @@ const BlogPage = () => {
                                     />
                                     <div className="p-4">
                                         <h2 className="text-xl font-semibold">{card.title}</h2>
-                                        <p className="text-gray-700 text-m my-2">{truncateWords(card.description, 10)}</p>
-                                        <p className="text-sm  text-gray-500">{card.date}</p>
+                                        <p className="text-gray-700 text-m my-2">
+                                            {truncateWords(card.description, 10)}
+                                        </p>
+                                        <p className="text-sm text-gray-500">{card.date}</p>
                                     </div>
                                 </Link>
                             ))}
                         </div>
                     </div>
 
-
                     {/* Pagination */}
                     <div className="flex justify-center items-center mt-10 gap-4">
                         <button
-                            className="px-4 py-2 border rounded cursor-pointer disabled:opacity-50"
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                             disabled={currentPage === 1}
+                            className="px-4 py-2 border rounded cursor-pointer disabled:opacity-50"
                         >
                             Previous
                         </button>
-
                         <span>
                             Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
                         </span>
-
                         <button
-                            className="px-4 py-2 border rounded cursor-pointer disabled:opacity-50"
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            onClick={() =>
+                                handlePageChange(Math.min(currentPage + 1, totalPages))
+                            }
                             disabled={currentPage === totalPages}
+                            className="px-4 py-2 border rounded cursor-pointer disabled:opacity-50"
                         >
                             Next
                         </button>
                     </div>
-
                 </div>
             </section>
         </>
