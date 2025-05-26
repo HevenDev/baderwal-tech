@@ -1,7 +1,6 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
+import EnquiryForm from "@/app/(home)/projects/[slug]/Form";
 
 type ProjectData = {
   slug: string;
@@ -23,9 +22,9 @@ const projectsData: ProjectData[] = [
     overview:
       "Eldeco Eden offers luxurious villas in a gated township with private gardens and modern amenities.",
     gallery: [
-      "/assets/images/projects/eden/1.jpg",
-      "/assets/images/projects/eden/2.jpg",
-      "/assets/images/projects/eden/3.jpg",
+      "/assets/images/home/usp.jpg",
+      "/assets/images/home/usp.jpg",
+      "/assets/images/home/usp.jpg",
     ],
     amenities: [
       "Clubhouse",
@@ -34,7 +33,7 @@ const projectsData: ProjectData[] = [
       "Jogging Track",
       "24/7 Security",
     ],
-    sitePlanImage: "/assets/images/projects/eden/siteplan.jpg",
+    sitePlanImage: "/assets/images/home/project1.jpg",
     locationMapEmbed:
       '<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>',
     brochureUrl: "/assets/brochures/eden.pdf",
@@ -66,15 +65,8 @@ interface Props {
 }
 
 export default function ProjectPage({ params }: Props) {
-  const slug = params.slug;
+  const { slug } = params;
   const project = projectsData.find((p) => p.slug === slug);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
 
   if (!project) {
     return (
@@ -82,18 +74,6 @@ export default function ProjectPage({ params }: Props) {
         <h1 className="text-3xl font-bold">Project Not Found</h1>
       </div>
     );
-  }
-
-  function handleInputChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // Implement form submit logic here (API call/email etc.)
-    setSubmitted(true);
   }
 
   return (
@@ -104,7 +84,7 @@ export default function ProjectPage({ params }: Props) {
         <p className="text-lg leading-relaxed">{project.overview}</p>
       </section>
 
-      {/* Project Gallery */}
+      {/* Gallery */}
       <section>
         <h2 className="text-3xl font-semibold mb-6">Project Gallery</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -167,47 +147,7 @@ export default function ProjectPage({ params }: Props) {
       {/* Enquire Now Form */}
       <section className="max-w-xl mx-auto">
         <h2 className="text-3xl font-semibold mb-6 text-center">Enquire Now</h2>
-        {submitted ? (
-          <p className="text-center text-green-600 font-semibold">
-            Thank you for your enquiry! We will get back to you soon.
-          </p>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            <input
-              type="text"
-              name="name"
-              placeholder="Your Name"
-              required
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Your Email"
-              required
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <textarea
-              name="message"
-              placeholder="Your Message"
-              rows={4}
-              required
-              value={formData.message}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition"
-            >
-              Submit
-            </button>
-          </form>
-        )}
+        <EnquiryForm enquiryEmail={project.enquiryEmail} />
       </section>
     </main>
   );
