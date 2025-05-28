@@ -3,26 +3,27 @@
 import { useState, useEffect, useRef } from "react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+  // const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const scrollDirection = useScrollDirection();
   const menuRef = useRef(null);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const closeMenu = () => {
     setIsMenuOpen(false);
-    setIsProjectsOpen(false);
+    // setIsProjectsOpen(false);
   };
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      if (menuRef.current && !(menuRef.current as any).contains(e.target)) {
-        closeMenu();
-      }
+      if (menuRef.current && !(menuRef.current as HTMLElement).contains(e.target as Node)) {
+            closeMenu();
+        }
+
     };
     if (isMenuOpen) {
       document.addEventListener("mousedown", handleOutsideClick);
