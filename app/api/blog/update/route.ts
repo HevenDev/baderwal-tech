@@ -1,49 +1,83 @@
-import { getDBPool } from "@/lib/db";
-import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
+// /app/api/blog/update/route.ts
+import { writeFile, unlink } from "fs/promises";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import { NextRequest, NextResponse } from "next/server";
+import { getDBPool } from "@/lib/db";
+import { RowDataPacket } from "mysql2";
 
-export async function POST(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const formData = await req.formData();
 
-    const title = formData.get("title")?.toString();
-    let slug = formData.get("slug")?.toString();
-    const metaTitle = formData.get("meta_title")?.toString();
-    const metaDescription = formData.get("meta_description")?.toString();
-    const metaKeyword = formData.get("meta_keyword")?.toString();
-    const content = formData.get("content")?.toString();
-    const oldThumbnail = formData.get("oldThumbnail")?.toString();
+    const id = formData.get("id")?.toString().trim();
+    const title = formData.get("title")?.toString().trim();
+    const slug = formData.get("slug")?.toString().trim();
+    const metaTitle = formData.get("meta_title")?.toString().trim();
+    const metaDescription = formData.get("meta_description")?.toString().trim();
+    const metaKeyword = formData.get("meta_keyword")?.toString().trim();
+    const description = formData.get("description")?.toString().trim();
+    const blogImage = formData.get("thumbnail") as File | null;
 
-    const file: File | null = formData.get("thumbnail") as File;
-    let thumbnailUrl = oldThumbnail;
-
-    // Clean and format slug
-    slug = slug?.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-
-    if (file && file.size > 0) {
-      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-        return NextResponse.json({ success: false, message: "Invalid file type" });
-      }
-
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `${uuidv4()}.${file.name.split(".").pop()}`;
-      const filePath = path.join(process.cwd(), "public/blog", fileName);
-
-      await writeFile(filePath, buffer);
-      thumbnailUrl = `/blog/${fileName}`;
+    if (!id) {
+      return NextResponse.json({ error: "Blog ID is required" }, { status: 400 });
     }
 
-    const pool = await getDBPool();
-    await pool.query(
-      `UPDATE blog SET title=?, slug=?, meta_title=?, meta_description=?, meta_keyword=?, image_url=?, description=? WHERE slug=?`,
-      [title, slug, metaTitle, metaDescription, metaKeyword, thumbnailUrl, content, slug]
+    const db = getDBPool();
+
+    const [rows] = await db.execute<RowDataPacket[]>(
+      "SELECT image_url FROM blog WHERE id = ?",
+      [id]
     );
 
-    return NextResponse.json({ success: true });
+    if (!rows || rows.length === 0) {
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+    }
+
+    const oldImage = rows[0].image_url;
+    let finalImagePath = oldImage;
+
+    if (blogImage && blogImage.size > 0) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+      if (!allowedTypes.includes(blogImage.type)) {
+        return NextResponse.json({ error: "Invalid image type" }, { status: 400 });
+      }
+
+      const buffer = Buffer.from(await blogImage.arrayBuffer());
+      const fileName = `blog/${Date.now()}_${blogImage.name}`;
+      const filePath = path.join(process.cwd(), "public", fileName);
+
+      await writeFile(filePath, buffer);
+      finalImagePath = fileName;
+
+      if (oldImage) {
+        const oldImagePath = path.join(process.cwd(), "public", oldImage);
+        try {
+          await unlink(oldImagePath);
+        } catch (err) {
+          console.warn("Old image not found or already removed");
+        }
+      }
+    }
+
+    await db.execute(
+  `UPDATE blog
+   SET title = ?, slug = ?, meta_title = ?, meta_description = ?, meta_keyword = ?, description = ?, image_url = ?
+   WHERE id = ?`,
+  [
+    title ?? null,
+    slug ?? null,
+    metaTitle ?? null,
+    metaDescription ?? null,
+    metaKeyword ?? null,
+    description ?? null,
+    finalImagePath ?? null,
+    id ?? null
+  ]
+);
+
+    return NextResponse.json({ success: true, message: "Blog updated successfully" });
   } catch (error) {
     console.error("Update error:", error);
-    return NextResponse.json({ success: false, message: "Update failed" });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

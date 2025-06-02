@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 interface BlogForm {
+  id: string;
   title: string;
   slug: string;
   meta_title: string;
   meta_description: string;
   meta_keyword: string;
   thumbnail: string;
-  content: string;
+  description: string;
 }
 
 export default function UpdateBlogPage() {
@@ -44,9 +45,9 @@ export default function UpdateBlogPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleContentChange = (content: string) => {
+  const handleContentChange = (description: string) => {
     if (!form) return;
-    setForm({ ...form, content });
+    setForm({ ...form, description });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,9 +65,9 @@ export default function UpdateBlogPage() {
     e.preventDefault();
     if (!form) return;
 
-    const { title, slug, meta_title, meta_description, meta_keyword, content } = form;
+    const { id, title, slug, meta_title, meta_description, meta_keyword, description } = form;
     const cleanSlug = slug.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
-    const cleanContent = content.replace(/<(.|\n)*?>/g, "").trim();
+    const cleanContent = description.replace(/<(.|\n)*?>/g, "").trim();
 
     if (!title || !cleanSlug || !meta_title || !meta_description || !meta_keyword || !cleanContent) {
       toast.error("All fields are required");
@@ -74,20 +75,22 @@ export default function UpdateBlogPage() {
     }
 
     const formData = new FormData();
+    formData.set("id", id);
     formData.set("title", title);
     formData.set("slug", cleanSlug);
     formData.set("meta_title", meta_title);
     formData.set("meta_description", meta_description);
     formData.set("meta_keyword", meta_keyword);
-    formData.set("content", content);
+    formData.set("description", description);
     formData.set("oldThumbnail", form.thumbnail);
     if (newFile) formData.set("thumbnail", newFile);
 
     try {
       setLoading(true);
-      const res = await axios.post("/api/blog/update", formData);
+      const res = await axios.put("/api/blog/update", formData);
       if (res.data.success) {
         toast.success("Blog updated successfully!");
+        router.push("/admin/manage-blog"); // redirect
       } else {
         toast.error("Update failed");
       }
@@ -112,18 +115,37 @@ export default function UpdateBlogPage() {
         <TextAreaWithLabel label="Meta Description" name="meta_description" value={form.meta_description} onChange={handleChange} />
         <InputWithLabel label="Meta Keyword" name="meta_keyword" value={form.meta_keyword} onChange={handleChange} />
 
-        {/* File Upload */}
+        {/* File Upload Custom UI */}
         <div className="space-y-2">
-          <Label htmlFor="thumbnail">Thumbnail Image</Label>
-          <Input type="file" accept="image/*" onChange={handleFileChange} />
-          {(newFile || form.thumbnail) && (
-            <div className="relative w-full max-w-xs aspect-video mt-4 border rounded overflow-hidden">
-              <Image
-                src={newFile ? URL.createObjectURL(newFile) : form.thumbnail}
-                alt="Preview"
-                fill
-                className="object-cover"
-              />
+          <Label>Thumbnail Image</Label>
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            accept="image/*"
+            id="thumbnailUpload"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {/* Preview with overlay */}
+          <div className="relative w-full max-w-xs aspect-video mt-4 border rounded overflow-hidden cursor-pointer group">
+            <Image
+              src={newFile ? URL.createObjectURL(newFile) : form.thumbnail}
+              alt="Preview"
+              fill
+              className="object-cover"
+            />
+            <label
+              htmlFor="thumbnailUpload"
+              className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex flex-col justify-center items-center transition-opacity duration-300 cursor-pointer"
+            >
+              <span className="text-xl">✏️</span>
+              <span className="text-sm mt-1">Edit</span>
+            </label>
+
+            {/* Optional remove button */}
+            {newFile && (
               <button
                 type="button"
                 className="absolute top-1 right-1 bg-white/80 hover:bg-white text-black px-2 py-1 text-xs rounded"
@@ -131,14 +153,14 @@ export default function UpdateBlogPage() {
               >
                 ✕
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Editor */}
         <div className="space-y-2">
           <Label>Content</Label>
-          <JoditEditor value={form.content} onChange={handleContentChange} />
+          <JoditEditor value={form.description} onChange={handleContentChange} />
         </div>
 
         <Button type="submit" disabled={loading} className="w-full sm:w-auto">
@@ -149,7 +171,7 @@ export default function UpdateBlogPage() {
   );
 }
 
-// Helper components
+// Reusable Input component
 function InputWithLabel({ label, ...props }: any) {
   return (
     <div className="space-y-2">
@@ -159,6 +181,7 @@ function InputWithLabel({ label, ...props }: any) {
   );
 }
 
+// Reusable Textarea component
 function TextAreaWithLabel({ label, ...props }: any) {
   return (
     <div className="space-y-2">
